@@ -1,0 +1,17 @@
+{
+  "name": "booklibrary",
+  "version": "1.0.0",
+  "description": "Simple book entry form that saves data to MongoDB.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
