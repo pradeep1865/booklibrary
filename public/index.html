@@ -13,7 +13,13 @@
     }
 
     h1 {
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    p.helper {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #4b5563;
     }
 
     form {
@@ -21,7 +27,7 @@
       padding: 1.5rem;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      max-width: 480px;
+      max-width: 520px;
     }
 
     label {
@@ -39,10 +45,12 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
+      font-size: 1rem;
     }
 
     textarea {
       resize: vertical;
+      min-height: 120px;
     }
 
     button {
@@ -52,16 +60,23 @@
       border: none;
       cursor: pointer;
       margin-top: 1.25rem;
+      transition: background 0.2s ease;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       background: #0055aa;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
 
     .status {
       margin-top: 1rem;
       padding: 0.75rem;
       border-radius: 4px;
+      display: none;
     }
 
     .status.success {
@@ -79,6 +94,10 @@
 </head>
 <body>
   <h1>Book Library Entry</h1>
+  <p class="helper">
+    Deploy this page to Vercel, set <code>MONGODB_URI</code> (and optionally <code>MONGODB_DB</code>),
+    then submit the form to insert a record into MongoDB.
+  </p>
   <form id="book-form">
     <label for="name">Book Name</label>
     <input type="text" id="name" name="name" required />
@@ -94,17 +113,24 @@
 
     <button type="submit">Save Book</button>
   </form>
-  <div id="status" class="status" style="display: none;"></div>
+  <div id="status" class="status"></div>
 
   <script>
     const form = document.getElementById('book-form');
     const statusBox = document.getElementById('status');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    function showStatus(type, message) {
+      statusBox.className = 'status ' + type;
+      statusBox.textContent = message;
+      statusBox.style.display = 'block';
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       statusBox.style.display = 'none';
-      statusBox.textContent = '';
-      statusBox.className = 'status';
+      submitButton.disabled = true;
+      submitButton.textContent = 'Saving...';
 
       const formData = new FormData(form);
       const payload = Object.fromEntries(formData.entries());
@@ -122,14 +148,13 @@
           throw new Error(data.message || 'Unable to save the book.');
         }
 
-        statusBox.classList.add('success');
-        statusBox.textContent = `Saved! Book ID: ${data.bookId}, Batch ID: ${data.batchId}`;
-        statusBox.style.display = 'block';
+        showStatus('success', `Saved! Book ID: ${data.bookId}, Batch ID: ${data.batchId}`);
         form.reset();
       } catch (error) {
-        statusBox.classList.add('error');
-        statusBox.textContent = error.message;
-        statusBox.style.display = 'block';
+        showStatus('error', error.message);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Save Book';
       }
     });
   </script>
